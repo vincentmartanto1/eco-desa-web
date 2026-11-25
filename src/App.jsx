@@ -268,11 +268,9 @@ const ECO_LANDING_CSS = `
 .eco-hero-title{font-size:clamp(20px,3.8vw,48px);color:var(--eco-ink);text-align:right}
 .eco-hero-title>span{background:var(--eco-paper);padding:0 0.1em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 .eco-hero-row{position:relative;display:grid;gap:24px;align-items:end;margin-top:clamp(-44px,-3vw,-6px);z-index:3}
-@media(min-width:768px){.eco-hero-row{grid-template-columns:auto 1fr;column-gap:clamp(24px,5vw,72px)}.eco-hero-copy{justify-self:end}}
-.eco-issue-big{font-weight:800;font-size:clamp(48px,9.5vw,130px);line-height:0.82;letter-spacing:-0.04em;color:var(--eco-ink);background:var(--eco-paper);justify-self:start;padding:0.06em 0.12em 0 0}
-.eco-hero-copy{display:flex;flex-direction:column;gap:16px;max-width:540px}
+@media(min-width:768px){.eco-hero-row{grid-template-columns:1fr}.eco-hero-copy{justify-self:end}}
+.eco-hero-copy{display:flex;flex-direction:column;gap:16px;max-width:580px}
 .eco-credit{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding-top:12px;border-top:1.5px solid var(--eco-ink);font-weight:800;font-size:10.5px;letter-spacing:0.05em;text-transform:uppercase}
-.eco-pop-dot{width:7px;height:7px;border-radius:99px;background:var(--eco-accent);display:inline-block;animation:eco-blink 1.6s ease-in-out infinite}
 
 /* Compass & Asterisk */
 .eco-compass{overflow:visible}
@@ -317,7 +315,6 @@ const ECO_LANDING_CSS = `
 
 @keyframes eco-spin{to{transform:rotate(360deg)}}
 @keyframes eco-marq{to{transform:translateX(-50%)}}
-@keyframes eco-blink{0%,100%{opacity:1}50%{opacity:0.25}}
 `;
 
 // ============================================================================
@@ -359,15 +356,6 @@ function mulberry32(seed) {
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-}
-
-function hashStr(s) {
-  let h = 2166136261;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return h >>> 0;
 }
 
 function unwrapAngle(prev, next) {
@@ -794,6 +782,7 @@ function formatDateID(dateStr) {
 export default function App() {
   const [activeTab, setActiveTab] = useState('landing');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [landingMenuOpen, setLandingMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [notification, setNotification] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -1188,11 +1177,14 @@ export default function App() {
   const navigateTo = (tabId) => {
     setActiveTab(tabId);
     setMobileMenuOpen(false);
+    setLandingMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const isLanding = activeTab === 'landing';
+
   return (
-    <div className="min-h-screen bg-[#F8FAF7] text-slate-800 flex flex-col lg:flex-row font-sans antialiased">
+    <div className={`min-h-screen bg-[#F8FAF7] text-slate-800 flex flex-col ${isLanding ? '' : 'lg:flex-row'} font-sans antialiased`}>
       {/* NOTIFIKASI TOAST */}
       {notification && (
         <div
@@ -1222,45 +1214,47 @@ export default function App() {
       )}
 
       {/* HEADER MOBILE */}
-      <header className="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-emerald-900/10 px-4 h-16 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={() => navigateTo('landing')}
-          className="flex items-center gap-2.5 text-left"
-        >
-          <div className="w-9 h-9 rounded-xl bg-[#176B45] text-white flex items-center justify-center shadow-sm">
-            <Leaf className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="font-extrabold text-base tracking-tight text-[#0B1F16] block leading-none">
-              ECO-DESA
-            </span>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#176B45]">
-              Digital Waste Platform
-            </span>
-          </div>
-        </button>
-
-        <div className="flex items-center gap-2">
-          {isAdmin && (
-            <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold uppercase">
-              Admin
-            </span>
-          )}
+      {!isLanding && (
+        <header className="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-emerald-900/10 px-4 h-16 flex items-center justify-between">
           <button
             type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-emerald-50"
-            aria-label="Buka menu navigasi"
-            aria-expanded={mobileMenuOpen}
+            onClick={() => navigateTo('landing')}
+            className="flex items-center gap-2.5 text-left"
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            <div className="w-9 h-9 rounded-xl bg-[#176B45] text-white flex items-center justify-center shadow-sm">
+              <Leaf className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="font-extrabold text-base tracking-tight text-[#0B1F16] block leading-none">
+                ECO-DESA
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#176B45]">
+                Digital Waste Platform
+              </span>
+            </div>
           </button>
-        </div>
-      </header>
+
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold uppercase">
+                Admin
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-emerald-50"
+              aria-label="Buka menu navigasi"
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+        </header>
+      )}
 
       {/* DRAWER MENU MOBILE */}
-      {mobileMenuOpen && (
+      {!isLanding && mobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 top-16 z-30 bg-slate-900/40 backdrop-blur-xs">
           <nav
             aria-label="Navigasi Mobile"
@@ -1291,98 +1285,191 @@ export default function App() {
         </div>
       )}
 
-      {/* SIDEBAR DESKTOP */}
-      <aside className="hidden lg:flex lg:w-72 lg:flex-col lg:sticky lg:top-0 lg:h-screen bg-white border-r border-emerald-900/10 shrink-0">
-        <div className="p-6 border-b border-emerald-900/10">
-          <button
-            type="button"
-            onClick={() => navigateTo('landing')}
-            className="flex items-center gap-3 text-left group"
-          >
-            <div className="w-11 h-11 rounded-2xl bg-[#176B45] text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-              <Leaf className="w-6 h-6" />
-            </div>
-            <div>
-              <span className="font-extrabold text-xl tracking-tight text-[#0B1F16] block leading-none">
-                ECO-DESA
-              </span>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#176B45] mt-1 block">
-                Digital Waste Management
-              </span>
-            </div>
-          </button>
-
-          <div className="mt-4 px-3 py-2 rounded-xl bg-[#F8FAF7] border border-emerald-900/10 flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-slate-600">Status Penyimpanan</span>
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#176B45]">
-              <span className={`w-2 h-2 rounded-full ${isSupabaseConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
-              {isSyncing ? 'Menyinkronkan...' : isSupabaseConnected ? 'Supabase Cloud' : 'Lokal Browser'}
-            </span>
-          </div>
-        </div>
-
-        <nav aria-label="Menu Utama" className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => navigateTo(item.id)}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                  isActive
-                    ? 'bg-[#176B45] text-white shadow-sm'
-                    : 'text-slate-600 hover:bg-emerald-50/80 hover:text-[#176B45]'
-                }`}
-              >
-                <span className="flex items-center gap-3">
-                  <Icon className="w-4 h-4 shrink-0" />
-                  {item.label}
-                </span>
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className="p-4 border-t border-emerald-900/10 space-y-3">
-          <div className="p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200/80">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-900">
-                Mode Akses
-              </span>
-              {isAdmin ? (
-                <Unlock className="w-3.5 h-3.5 text-amber-700" />
-              ) : (
-                <Lock className="w-3.5 h-3.5 text-slate-500" />
-              )}
-            </div>
-            <p className="text-xs text-amber-950/80 mb-2.5 leading-snug">
-              {isAdmin
-                ? 'Mode Pengurus Desa aktif. Anda dapat mengedit & menghapus data.'
-                : 'Mode Warga Publik. Aktifkan Admin untuk kelola basis data.'}
-            </p>
+      {/* TOMBOL MENU FLOATING & DRAWER SAAT BERADA DI BERANDA FULLWIDTH */}
+      {isLanding && (
+        <>
+          <div className="fixed top-5 right-5 sm:top-7 sm:right-8 z-40">
             <button
               type="button"
-              onClick={() => {
-                if (isAdmin) {
-                  setIsAdmin(false);
-                  showNotification('success', 'Kembali ke Mode Warga Publik.');
-                } else {
-                  navigateTo('admin');
-                }
-              }}
-              className={`w-full py-2 px-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-colors ${
-                isAdmin
-                  ? 'bg-slate-900 text-white hover:bg-slate-800'
-                  : 'bg-[#176B45] text-white hover:bg-[#125637]'
-              }`}
+              onClick={() => setLandingMenuOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/95 backdrop-blur border border-emerald-900/15 text-[#0B1F16] text-xs font-extrabold uppercase tracking-wider shadow-lg hover:bg-emerald-50 transition-all"
+              aria-label="Buka menu navigasi"
             >
-              {isAdmin ? 'Keluar Mode Admin' : 'Login Mode Admin'}
+              <Menu className="w-4 h-4 text-[#176B45]" />
+              <span>Menu</span>
             </button>
           </div>
-        </div>
-      </aside>
+
+          {landingMenuOpen && (
+            <div className="fixed inset-0 z-50 bg-slate-900/45 backdrop-blur-xs flex justify-end">
+              <div className="w-72 bg-white h-full shadow-2xl border-l border-emerald-900/10 flex flex-col justify-between p-5 overflow-y-auto">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-[#176B45] text-white flex items-center justify-center">
+                        <Leaf className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="font-extrabold text-base text-[#0B1F16] block leading-none">ECO-DESA</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#176B45]">
+                          Digital Waste Platform
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setLandingMenuOpen(false)}
+                      className="p-2 rounded-xl hover:bg-slate-100 text-slate-600"
+                      aria-label="Tutup menu"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <nav aria-label="Menu Beranda" className="space-y-1">
+                    {navItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = activeTab === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => navigateTo(item.id)}
+                          className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition-colors ${
+                            isActive
+                              ? 'bg-[#176B45] text-white'
+                              : 'text-slate-700 hover:bg-emerald-50 hover:text-[#176B45]'
+                          }`}
+                        >
+                          <Icon className="w-4 h-4 shrink-0" />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </nav>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (isAdmin) {
+                        setIsAdmin(false);
+                        setLandingMenuOpen(false);
+                        showNotification('success', 'Kembali ke Mode Warga Publik.');
+                      } else {
+                        navigateTo('admin');
+                      }
+                    }}
+                    className={`w-full py-2.5 px-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-colors ${
+                      isAdmin
+                        ? 'bg-slate-900 text-white hover:bg-slate-800'
+                        : 'bg-[#176B45] text-white hover:bg-[#125637]'
+                    }`}
+                  >
+                    {isAdmin ? 'Keluar Mode Admin' : 'Login Mode Admin'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* SIDEBAR DESKTOP */}
+      {!isLanding && (
+        <aside className="hidden lg:flex lg:w-72 lg:flex-col lg:sticky lg:top-0 lg:h-screen bg-white border-r border-emerald-900/10 shrink-0">
+          <div className="p-6 border-b border-emerald-900/10">
+            <button
+              type="button"
+              onClick={() => navigateTo('landing')}
+              className="flex items-center gap-3 text-left group"
+            >
+              <div className="w-11 h-11 rounded-2xl bg-[#176B45] text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                <Leaf className="w-6 h-6" />
+              </div>
+              <div>
+                <span className="font-extrabold text-xl tracking-tight text-[#0B1F16] block leading-none">
+                  ECO-DESA
+                </span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#176B45] mt-1 block">
+                  Digital Waste Management
+                </span>
+              </div>
+            </button>
+
+            <div className="mt-4 px-3 py-2 rounded-xl bg-[#F8FAF7] border border-emerald-900/10 flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-slate-600">Status Penyimpanan</span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#176B45]">
+                <span className={`w-2 h-2 rounded-full ${isSupabaseConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                {isSyncing ? 'Menyinkronkan...' : isSupabaseConnected ? 'Supabase Cloud' : 'Lokal Browser'}
+              </span>
+            </div>
+          </div>
+
+          <nav aria-label="Menu Utama" className="flex-1 p-4 space-y-1 overflow-y-auto">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => navigateTo(item.id)}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    isActive
+                      ? 'bg-[#176B45] text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-emerald-50/80 hover:text-[#176B45]'
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <Icon className="w-4 h-4 shrink-0" />
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+
+          <div className="p-4 border-t border-emerald-900/10 space-y-3">
+            <div className="p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200/80">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-900">
+                  Mode Akses
+                </span>
+                {isAdmin ? (
+                  <Unlock className="w-3.5 h-3.5 text-amber-700" />
+                ) : (
+                  <Lock className="w-3.5 h-3.5 text-slate-500" />
+                )}
+              </div>
+              <p className="text-xs text-amber-950/80 mb-2.5 leading-snug">
+                {isAdmin
+                  ? 'Mode Pengurus Desa aktif. Anda dapat mengedit & menghapus data.'
+                  : 'Mode Warga Publik. Aktifkan Admin untuk kelola basis data.'}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  if (isAdmin) {
+                    setIsAdmin(false);
+                    showNotification('success', 'Kembali ke Mode Warga Publik.');
+                  } else {
+                    navigateTo('admin');
+                  }
+                }}
+                className={`w-full py-2 px-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-colors ${
+                  isAdmin
+                    ? 'bg-slate-900 text-white hover:bg-slate-800'
+                    : 'bg-[#176B45] text-white hover:bg-[#125637]'
+                }`}
+              >
+                {isAdmin ? 'Keluar Mode Admin' : 'Login Mode Admin'}
+              </button>
+            </div>
+          </div>
+        </aside>
+      )}
 
       {/* KONTEN UTAMA */}
       <main className="flex-1 min-w-0 flex flex-col">
@@ -1486,7 +1573,6 @@ export default function App() {
 // ============================================================================
 
 function LandingPageView({ onNavigate, metrics, announcements, onNotify, isSupabaseConnected }) {
-  const [pops, setPops] = useState(0);
   const [openDossier, setOpenDossier] = useState(-1);
   const [rsvpState, setRsvpState] = useState({});
   const stageRef = useRef(null);
@@ -1598,9 +1684,9 @@ function LandingPageView({ onNavigate, metrics, announcements, onNotify, isSupab
   ];
 
   return (
-    <div className="p-2 sm:p-4 lg:p-6">
+    <div className="w-full">
       <style>{ECO_LANDING_CSS}</style>
-      <div className="eco-poster">
+      <div className="eco-poster !rounded-none !border-x-0">
         {/* HERO SECTION DENGAN WORDMARK GELEMBUNG INTERAKTIF */}
         <section className="eco-hero">
           <div className="eco-orbits" aria-hidden="true">
@@ -1625,7 +1711,6 @@ function LandingPageView({ onNavigate, metrics, announcements, onNotify, isSupab
               density={2}
               scale={0.38}
               mask={wordMask}
-              onPop={() => setPops((p) => p + 1)}
             />
             <div className="eco-hero-mark">
               <CompassLogoMark size={135} follow className="hidden sm:block" />
@@ -1640,17 +1725,6 @@ function LandingPageView({ onNavigate, metrics, announcements, onNotify, isSupab
 
           <div className="eco-in">
             <div className="eco-hero-row">
-              <div className="flex flex-col gap-3">
-                <span className="eco-issue-big">
-                  {metrics.totalWeight > 0 ? `${metrics.totalWeight.toFixed(0)}kg` : '00'}
-                </span>
-                <span className="eco-mono text-[#5A7466] flex items-center gap-2">
-                  <i className="eco-pop-dot" />
-                  Klik gelembung hijau di atas untuk memecahkannya
-                  {pops > 0 && <b className="text-[#176B45]">({pops} pecah)</b>}
-                </span>
-              </div>
-
               <div className="eco-hero-copy">
                 <InteractiveAsterisk size={22} style={{ alignSelf: 'flex-start' }} />
                 <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[#0B1F16] leading-tight">
@@ -1700,7 +1774,6 @@ function LandingPageView({ onNavigate, metrics, announcements, onNotify, isSupab
               density={2}
               scale={0.42}
               mask={bandMask}
-              onPop={() => setPops((p) => p + 1)}
             />
             <div className="eco-title eco-band-title">
               <span>GOTONG ROYONG</span>
@@ -1998,7 +2071,6 @@ function LandingPageView({ onNavigate, metrics, announcements, onNotify, isSupab
               density={2}
               scale={0.48}
               mask={footMask}
-              onPop={() => setPops((p) => p + 1)}
             />
             <div className="eco-title">
               <span>ECO-DESA.</span>
